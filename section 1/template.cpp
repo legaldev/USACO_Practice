@@ -18,7 +18,6 @@ int main(){
 		return 0;
 	}
 
-	cout << (string("abc") < string("abbd")) << endl;
 
 	file_in.close();
 	file_out.close();
