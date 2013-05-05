@@ -15,12 +15,11 @@ int main(){
 
 	string s("010");
 	int test;
+	//cout << test << endl;
 	stringstream ss;
-	ss = stringstream(s);
-	ss >> test;
-
-	cout << test << endl;
-
+	ss << 1 << " ";
+	//ss >> test;
+	cout << ss.str() << endl;
 
 	return 0;
 }
