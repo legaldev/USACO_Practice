@@ -9,17 +9,43 @@ LANG: C++
 #include <fstream>
 
 using namespace std;
+bool load();
+void save(ostream& out);
+bool save();
 
 int main(){
-	ifstream file_in("beads.in");
-	ofstream file_out("beads.out");
-	if(!file_in || !file_out){
-		cerr << "Error: Failed to open file" << endl;
-		return 0;
+	load();
+	save();
+	return 0;
+}
+
+bool load()
+{
+	ifstream file_in("holstein.in");
+	if(!file_in)
+	{
+		cerr << "Error: Failed to load file." << endl;
+		return false;
 	}
 
+	return true;
+}
 
-	file_in.close();
-	file_out.close();
-	return 0;
+void save(ostream& out)
+{
+
+}
+
+bool save()
+{
+	ofstream file_out("holstein.out");
+	if(!file_out){
+		cerr << "Error: Failed to open file." << endl;
+		return false;
+	}
+
+	save(file_out);
+	save(cout);
+
+	return true;
 }
