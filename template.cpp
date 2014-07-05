@@ -7,11 +7,14 @@ LANG: C++
 #include <iostream>
 #include <string>
 #include <fstream>
-
+#define PV(v) std::cout << #v << " = " << v << std::endl;
+#define INPUT_FILE "beads.in"
+#define OUTPUT_FILE "beads.out"
 using namespace std;
 bool load();
 void save(ostream& out);
 bool save();
+void solve();
 
 int main(){
 	load();
@@ -21,7 +24,7 @@ int main(){
 
 bool load()
 {
-	ifstream file_in("holstein.in");
+	ifstream file_in(INPUT_FILE);
 	if(!file_in)
 	{
 		cerr << "Error: Failed to load file." << endl;
@@ -38,7 +41,7 @@ void save(ostream& out)
 
 bool save()
 {
-	ofstream file_out("holstein.out");
+	ofstream file_out(OUTPUT_FILE);
 	if(!file_out){
 		cerr << "Error: Failed to open file." << endl;
 		return false;
