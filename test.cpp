@@ -21,14 +21,6 @@ struct MeshData
 	int*	pIndexBuffer;
 };
 
-struct Noop{
-	template<typename T>
-	Noop&	operator()(T&&)
-	{
-		return *this;
-	}
-};
-
 int main(){
 
 	string s("010");
@@ -49,10 +41,9 @@ int main(){
 	unsigned char uca = ca;
 	cout << (int)uca << endl;
 
-	Noop noop;
-	noop(1);
-
 	cout << (unsigned char)1 - (unsigned char)3 << endl;
+
+	cout << -1 % 50 << endl;
 
 	return 0;
 }
