@@ -8,8 +8,14 @@ LANG: C++
 #include <string>
 #include <fstream>
 #define PV(v) std::cout << #v << " = " << v << std::endl;
-#define INPUT_FILE "beads.in"
-#define OUTPUT_FILE "beads.out"
+#define PVL(v, n) \
+	std::cout << #v << " = ";\
+	for(int _i=0; _i<n; ++_i) \
+		{std::cout << v[_i] << ", ";}\
+	std::cout << std::endl;
+#define PROB_NAME "combo"
+#define INPUT_FILE PROB_NAME".in"
+#define OUTPUT_FILE PROB_NAME".out"
 using namespace std;
 bool load();
 void save(ostream& out);
