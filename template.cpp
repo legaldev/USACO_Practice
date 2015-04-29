@@ -16,7 +16,9 @@ LANG: C++
 #define PROB_NAME "combo"
 #define INPUT_FILE PROB_NAME".in"
 #define OUTPUT_FILE PROB_NAME".out"
+
 using namespace std;
+
 bool load();
 void save(ostream& out);
 bool save();
