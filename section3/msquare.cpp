@@ -197,7 +197,7 @@ int encode(int *board)
   for (lv = 0; lv < 8; lv++)
    {
     t = look[board[lv]]; /* the rank of the board position */
-    PV(t)
+    // PV(t)
     assert(t < 8-lv); /* sanity check */
     rv += t * mult[lv]; 
 
@@ -206,20 +206,39 @@ int encode(int *board)
     /* delete t */
     look[rlook[7-lv]] = t;
     rlook[t] = rlook[7-lv];
-    PVL(look, 8)
-    PVL(rlook, 8)
+    // PVL(look, 8)
+    // PVL(rlook, 8)
    }
   return rv;
  }
+
+void stob(const string& s, int* board)
+{
+	for(int i=0; i<8; ++i)
+	{
+		board[i] = (s[i] - '0') % 8;
+	}
+}
 
 void solve()
 {
 	node root(0);
 	m.insert(pair<string, node>(start, root));
+	int board[8] = {1,0,6,5,4,3,2,7};
+	PV(encode(board))
 
-	int b[] = {1,2,3,4,5,6,7,0};
-	PV(encode(b))
-	//bfs();
+	bfs();
+	map<int, string> mi;
+	for(map<string, node>::iterator it=m.begin(); it!=m.end(); ++it)
+	{
+		stob(it->first, board);
+		mi.insert(pair<int, string>(encode(board), it->first));
+	}
+
+	PV(mi[0])
+	PV(mi[1])
+	PV(mi[2])
+
 	//dfs(0, "12345678");
 
 	//PV(m.size())
