@@ -268,15 +268,8 @@ void update_heap(int i, int n)
 	if(n <= 0)
 		return;
 	int p=i;
-	int other;
 	if(i > 0)
 	{
-		int vni = vn[i];
-		// if(dist[cur_src][vni] == 83)
-		// {
-		// 	PV("update here")
-		// 	// exit(0);
-		// }
 		do
 		{
 
@@ -285,13 +278,6 @@ void update_heap(int i, int n)
 			{
 				my_swap(p, i);
 				i = p;
-
-				// if(dist[cur_src][vni] == 83)
-				// {
-				// 	PV(i)
-				// 	PV(dist[cur_src][vn[i]])
-				// 	// exit(0);
-				// }
 			}
 			else
 			{
@@ -299,35 +285,15 @@ void update_heap(int i, int n)
 			}
 
 		}while(i > 0);
-
-		// if(dist[cur_src][vni] == 83)
-		// {
-		// 	PV("stop here")
-		// 	PV(i)
-		// 	PV(dist[cur_src][vn[0]])
-		// 	// exit(0);
-		// }
 	}
 	else
 	{
-		int newn = n;
 		p = i;
-		// PV(newn)
 		do
 		{
 			int ch1 = 2 * p + 1;
 			int ch2 = 2 * p + 2;
 			int min = p;
-			// if(vn[n] == 122)
-			// {
-			// 	PV(vn[0])
-			// 	PV(dist[cur_src][vn[0]])
-			// 	PV(vn[1])
-			// 	PV(dist[cur_src][vn[1]])
-			// 	PV(vn[2])
-			// 	PV(dist[cur_src][vn[2]])
-			// 	exit(0);
-			// }
 
 			if(ch2 < n)
 			{
@@ -343,54 +309,18 @@ void update_heap(int i, int n)
 			}
 			else
 			{
-				// if(dist[cur_src][vn[p]] == INF)
-				// 	cout << "Here";
 				break;
 			}
 
 			if(min == p || min >= n)
 			{
-				// if(dist[cur_src][vn[p]] == INF)
-				// 	cout << "Here";
 				break;
 			}
 
 			assert(dist[cur_src][vn[min]] < dist[cur_src][vn[p]]);
-
-			// PV(dist[cur_src][vn[min]])
-			// PV(dist[cur_src][vn[p]])
-			// if(ss.count(vn[min]))
-			// {
-
-			// 	PV("Here");
-			// 	PV(vn[min]);
-			// 	PV(min);
-			// 	PV(n);
-			// 	exit(0);
-			// }
-
 			my_swap(p, min);
 
 			p = min;
-			// PV(p)
-			// if(ch1 < n && c(vn[p], vn[ch1]) && c(vn[ch2], vn[ch1]))
-			// {
-			// 	// PV(ch1)
-			// 	// PV(dist[cur_src][vn[ch1]])
-			// 	swap(vn[p], vn[ch1]);
-			// 	swap(vton[vn[p]], vton[vn[ch1]]);
-			// 	p = ch1;
-			// }
-			// else if(ch2 < n && c(vn[p], vn[ch2]))
-			// {
-			// 	// PV(ch2)
-			// 	// PV(dist[cur_src][vn[ch2]])
-			// 	swap(vn[p], vn[ch2]);
-			// 	swap(vton[vn[p]], vton[vn[ch2]]);
-			// 	p = ch2;
-			// }
-			// else
-			// 	break;
 		}while(p < n);
 	}
 
@@ -398,8 +328,7 @@ void update_heap(int i, int n)
 
 void my_pop_heap(int n)
 {
-	swap(vn[0], vn[n-1]);
-	swap(vton[vn[0]], vton[vn[n-1]]);
+	my_swap(0, n-1);
 	update_heap(0, n-1);
 }
 
@@ -418,63 +347,26 @@ void dijkstra_fast(int src)
 		vton[vn[i]] = i;
 	}
 
-	// PV(src)
-	// PV(vn[0])
-	// PV(vn[P-1])
-	// ss.clear();
 	for(int i=P; i>0; --i)
 	{
 		int n = vn[0];
-		// PV(n)
-		// PV(dist[src][n])
-		// if(ss.count(n) > 0)
-		// {
-		// 	cout << "found";
-		// 	PV(n)
-		// 	exit(0);
-		// }
-		// ss.insert(n);
-		// PV(dist[src][625])
-		// if(dist[src][n] == 82)
-		// {
-		// 	PV(dist[src][vn[0]])
-		// 	PV(dist[src][vn[1]])
-		// 	PV(dist[src][vn[2]])
-		// }
 
 		my_pop_heap(i);
 		// pop_heap(vn, vn+i, c);
-		// if(n != 98 and vn[0] == 98)
-		// {
-		// 	cout << "found" << endl;
-		// 	return;
-		// }
-
-		// if(dist[src][0] == 82)
-		// {
-		// 	PV(dist[src][vn[0]])
-		// 	PV(dist[src][vn[1]])
-		// 	PV(dist[src][vn[2]])
-		// }
 
 		if(edges.count(n) > 0)
 		{
 			const vector<int>& e = edges[n];
 			for(vector<int>::const_iterator it=e.begin(); it!=e.end(); ++it)
 			{
-				if(dist[src][n] + dist[n][*it] < dist[src][*it])
+				if(vton[*it] <= i-1 && dist[src][n] + dist[n][*it] < dist[src][*it])
 				{
 					dist[src][*it] = dist[src][n] + dist[n][*it];
 					// make_heap(vn, vn+i-1, compare());
-					// int len = vton[*it]+1;
-					// PV(*it)
-					// PVL(vn, len)
+
 					assert(vn[vton[*it]] == *it);
 					update_heap(vton[*it], i-1);
 					assert(vn[vton[*it]] == *it);
-					// PV(*it)
-					// PVL(vn, len)
-					// return;
 				}
 			}
 		}
