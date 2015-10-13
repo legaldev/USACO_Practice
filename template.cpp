@@ -11,7 +11,7 @@ LANG: C++
 #define PVL(v, n) \
 	std::cout << #v << " = ";\
 	for(int _i=0; _i<n; ++_i) \
-		{std::cout << v[_i] << ", ";}\
+		{std::cout << (v)[_i] << ", ";}\
 	std::cout << std::endl;
 #define PROB_NAME "combo"
 #define INPUT_FILE PROB_NAME".in"
