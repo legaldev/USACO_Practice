@@ -102,6 +102,7 @@ bool save()
 
 
 int near[8][2] = {{-1, -2}, {-2, -1}, {-2, 1}, {-1, 2}, {1, -2}, {2, -1}, {1, 2}, {2, 1}};
+int neardiff[8] = {0};
 int vn[MAX_SIZE];
 int mark[MAX_SIZE];
 int vton[MAX_SIZE];
@@ -116,7 +117,7 @@ vector<int> find_near(int c)
 	vector<int> res;
 	for(int i=0; i<8; ++i)
 	{
-		int n = c + near[i][0] * row + newr[i][1];
+		int n = c + neardiff[i];
 		if(n < 0 || n >= maxs)
 			continue;
 		res.push_back(maxs);
@@ -179,11 +180,17 @@ void godown_heap(int src, int i, int n)
 			break;
 		}
 
-		assert(dist[cur_src][vn[min]] < dist[cur_src][vn[p]]);
+		//assert(dist[cur_src][vn[min]] < dist[cur_src][vn[p]]);
 		my_swap(p, min);
 
 		p = min;
 	}while(p < n);
+}
+
+void my_pop_heap(int n)
+{
+	my_swap(0, n-1);
+	godown_heap(0, n-1);
 }
 
 void dijkstra(int src)
@@ -205,38 +212,27 @@ void dijkstra(int src)
 		goup_heap(src, *it);
 	}
 
-
 	//make_heap(vn, vn+P, c);
 
-	for(int i=0; i<P; ++i)
+	for(int i=maxs; i>0; --i)
 	{
-		vton[vn[i]] = i;
-	}
-
-	for(int i=P; i>0; --i)
-	{
-		int n = vn[0];
+		//int n = vn[0];
 
 		my_pop_heap(i);
 		// pop_heap(vn, vn+i, c);
 
-		if(edges.count(n) > 0)
+		for(int j=0; j<8; ++j)
 		{
-			const vector<int>& e = edges[n];
-			for(vector<int>::const_iterator it=e.begin(); it!=e.end(); ++it)
+			int next = c + neardiff[i];
+			if(next < 0 || next >= maxs)
+				continue;
+			
+			if(vton[next] <= i-1 && grid[src][n] + grid[n][next] < grid[src][next])
 			{
-				if(vton[*it] <= i-1 && dist[src][n] + dist[n][*it] < dist[src][*it])
-				{
-					dist[src][*it] = dist[src][n] + dist[n][*it];
-					// make_heap(vn, vn+i-1, compare());
-
-					assert(vn[vton[*it]] == *it);
-					update_heap(vton[*it], i-1);
-					assert(vn[vton[*it]] == *it);
-				}
+				grid[src][next] = grid[src][n] + grid[n][next];
+				goup_heap(vton[next], i-1);
 			}
 		}
-
 	}
 }
 
@@ -245,6 +241,14 @@ void solve()
 	for(int i=0; i<maxs; ++i)
 		for(int j=0; j<maxs; ++j)
 			grid[i][j] = INF;
+
+
+	for(int i=0; i<8; ++i)
+	{
+		neardiff[i] = near[i][0] * row + newr[i][1];
+	}
+
+	
 
 }
 
