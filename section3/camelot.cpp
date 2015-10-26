@@ -9,6 +9,8 @@ LANG: C++
 #include <fstream>
 #include <vector>
 #include <queue>
+#include <set>
+#include <cassert>
 #define PV(v) std::cout << #v << " = " << v << std::endl;
 #define PVL(v, n) \
 	std::cout << #v << " = ";\
@@ -21,14 +23,15 @@ LANG: C++
 #define MAX_ROW 30
 #define MAX_COL 26
 #define MAX_SIZE MAX_ROW * MAX_COL
-#define INF 0x7fffffff
+#define INF 0x7ffffffe
+typedef unsigned int uint;
 
 using namespace std;
 
 int row = 0, col = 0;
 int maxs = 0;
-int res = 0;
-int grid[MAX_SIZE][MAX_SIZE] = {0};
+uint res = 0;
+uint grid[MAX_SIZE][MAX_SIZE] = {0};
 
 int king = 0;
 vector<int> knight;
@@ -78,17 +81,32 @@ bool load()
 
 	king = getPos(r, c);
 
+	set<int> sk;
+
 	while(file_in.eof() == 0)
 	{
 		file_in >> c;
-		if(file_in.eof())
-			break;
 		file_in >> r;
-		knight.push_back(getPos(r, c));
+		//knight.push_back(getPos(r, c));
+		sk.insert(getPos(r, c));
 	}
+
+
+	// for(int i=0; i<maxs; ++i)
+	// {
+	// 	if(sk.count(i) == 0)
+	// 	{
+	// 		PV(i)
+	// 		sk.insert(i);
+	// 	}
+	// }
+
+	for(set<int>::iterator it=sk.begin(); it!=sk.end(); ++it)
+		knight.push_back(*it);
 
 	PV(row)
 	PV(col)
+	PV(maxs)
 	PV(king)
 	PV(knight.size())
 	PVL(knight, knight.size())
@@ -297,19 +315,34 @@ void bfs(int src)
 		int move = grid[src][cur];
 		for(int j=0; j<8; ++j)
 		{
+			// int nr = r + near[j][0];
+			// int nc = c + near[j][1];
+
+			// if (nr < 0 || nr >= row || nc < 0 || nc >=col)
+			// 	continue;			
+
+			// int next = nr * col + nc;
+			// if(grid[src][next] < INF)
+			// 	continue;
+
 			int next = cur + neardiff[j];
-			if(r + near[j][0] < 0 || r + near[j][0] >= row || c + near[j][1] < 0 || 
-				c + near[j][1] >=col || next < 0 || next >= maxs || grid[src][next] < INF)
+
+			if(next < 0 || next >= maxs || grid[src][next] < INF || 
+				r + near[j][0] < 0 || r + near[j][0] >= row || 
+				c + near[j][1] < 0 || c + near[j][1] >=col)
 				continue;
+
 			grid[src][next] = move + 1;
 			node.push(next);
+			// PV(next)
+			// PV(grid[src][next])
 		}
 	}
 }
 
 int near_knight[MAX_SIZE];
-int king_grid[MAX_SIZE][MAX_SIZE] = {0};
-int res_grid[MAX_SIZE] = {0};
+uint king_grid[MAX_SIZE][MAX_SIZE] = {0};
+uint res_grid[MAX_SIZE] = {0};
 
 int king_dist(int src, int dst)
 {
@@ -342,7 +375,7 @@ void solve2()
 
 	for(int i=0; i<8; ++i)
 	{
-		neardiff[i] = near[i][0] * row + near[i][1];
+		neardiff[i] = near[i][0] * col + near[i][1];
 	}
 
 	// PVL(neardiff, 8)
@@ -350,20 +383,6 @@ void solve2()
 	for(int i=0; i<maxs; ++i)
 	{
 		bfs(i);
-	}
-
-	for(int i=0; i<maxs; ++i)
-	{
-		int neard = INF;
-		near_knight[i] = -1;
-		for(int j=0; j<knight.size(); ++j)
-		{
-			if(grid[knight[j]][i] < neard)
-			{
-				neard = grid[knight[j]][i];
-				near_knight[i] = knight[j];
-			}
-		}
 	}
 
 	// PVL(near_knight, maxs)
@@ -375,50 +394,63 @@ void solve2()
 
 	king_path();
 
-	// PVL(king_grid[0], maxs)
+	PVL(king_grid[0], maxs)
 
 	if(knight.empty())
 		return;
 
 	for(int i=0; i<maxs; ++i)
 	{
-		res_grid[i] = king_grid[king][i];
+		res_grid[i] = 0;//king_grid[king][i];
 		for(int j=0; j<knight.size(); ++j)
 		{
 			res_grid[i] += grid[knight[j]][i];
 		}
+		// PV(res_grid[i])
 	}
 
 	PVL(res_grid, maxs)
 
+	vector<int> search_pos;
+	int kr, kc;
+	getrc(king, kr, kc);
+	int range = 3;
+	for(int i=-range; i<=range; ++i)
+	{
+		for(int j=-range; j<=range; ++j)
+		{
+			int r = kr + i;
+			int c = kc + j;
+			if(r  < 0 || r >= row || c < 0 || c >=col)
+				continue;
+			search_pos.push_back(r * col + c);
+		}
+	}
+
+	PVL(search_pos, search_pos.size())
+
 	res = INF;
-	int minp = 0;
+	uint minp = 0;
 	for(int i=0; i<maxs; ++i)
 	{
-		int mind = 0;
+		int mind = INF;
 
-		for(int j=0; j<maxs; ++j)
+		for(vector<int>::iterator itj=search_pos.begin(); itj!=search_pos.end(); ++itj)
+		//for(int j=0; j<maxs; ++j)
 		{
+			int j = *itj;
 			for(int k=0; k<knight.size(); ++k)
 			{
-				//int kn = near_knight[j];
 				int kn = knight[k];
-				int d = king_grid[king][j] + grid[kn][j] + grid[j][i] - king_grid[king][i] - grid[kn][i];
-
-				// if(i == 33 && j == 27)
-				// {
-				// 	PV(near_knight[j])
-				// 	PV(grid[kn][j])
-				// 	PV(d)
-				// }
-
+				long long d = king_grid[king][j] + grid[kn][j] + grid[j][i] - grid[kn][i];
 				if(d < mind)
 					mind = d;
 			}
 		}
 
-		if(mind < 0)
-			res_grid[i] = res_grid[i] + mind;
+		// // if(mind < 0)
+
+		res_grid[i] = res_grid[i] + mind;
 
 		if(res_grid[i] < res)
 		{
@@ -437,3 +469,203 @@ void solve2()
 	// PVL(grid[knight[0]], maxs)
 
 }
+
+
+// This is a modification of the shortest path algorithm. If there was no king, then the shortest path algorithm can determine the distance that each knight must travel to get to each square. Thus, the cost of gathering in a particular square is simply the sum of the distance that each knight must travel, which is fairly simple to calculate.
+
+// In order to consider the king, consider a knight which 'picks-up' the king in some square and then travels to the gathering spot. This costs some number of extra moves than just traveling to the gathering spot. In particular, the king must move to the pick-up square, and the knight must travel to this square and then to the final gathering point. Consider the number of extra moves to be the `cost' for that knight to pick-up the king. It is simple to alter the shortest path algorithm to consider picking-up the king by augmenting the state with a boolean flag stating whether the knight has the king or not.
+
+// In this case, the cost for gathering at a particular location is the sum of the distance that each knight must travel to get to that square plus the minimum cost for a knight picking up the king on the way.
+
+// Thus, for each square, we keep two numbers, the sum of the distance that all the knights that we have seen thus far would have to travel to get to this square and the minimum cost for one of those knights picking up the king on the way (note that one way to 'pick-up' the king is to have the king travel all by itself to the gathering spot). Then, when we get a new knight, we run the shortest path algorithm and add the cost of getting that knight (without picking up the king) to each square to the cost of gathering at that location. Additionally, for each square, we check if the new knight can pick-up the king in fewer moves than any previous knight, and update that value if it can.
+
+// After all the knights have been processed, we determine the minimum over all squares of the cost to get to that square plus the additional cost for a knight to pick-up the king on its way to that square.
+
+// #include <stdio.h>
+// #include <string.h>
+// #include <stdlib.h>
+
+// /* "infinity"... > maximum distance possible (for one knight) */
+// #define MAXN 10400
+
+// /* maximum number of rows */
+// #define MAXR 40 
+
+// /* maximum number of columns */
+// #define MAXC 26 
+
+// /* cost of collecting all knights here */
+// int cost[MAXC][MAXR]; 
+
+// /* cost of getting a knight to collect the king */
+// int kingcost[MAXC][MAXR];
+
+// /* distance the king must travel to get to this position */
+// int kdist[MAXC][MAXR];
+
+// /* distance to get for current knight to get to this square */
+// /* third index: 0 => without king, 1 => with king */
+// int dist[MAXC][MAXR][2]; 
+
+// /* number of rows and columns */
+// int nrow, ncol;
+
+// int do_step(int x, int y, int kflag) {
+//     int f = 0; /* maximum distance added */
+//     int d = dist[x][y][kflag]; /* distance of current move */
+
+//   /* go through all possible moves that a knight can make */
+//     if (y > 0) {
+//         if (x > 1)
+//              if (dist[x-2][y-1][kflag] > d+1) {
+//                  dist[x-2][y-1][kflag] = d+1;
+//                  f = 1;
+//              }
+//             if (x < ncol-2) {
+//                 if (dist[x+2][y-1][kflag] > d+1) {
+// 	            dist[x+2][y-1][kflag] = d+1;
+// 	            f = 1;
+// 	        }
+//             }
+//             if (y > 1) {
+//                 if (x > 0)
+// 	            if (dist[x-1][y-2][kflag] > d+1) {
+// 	                dist[x-1][y-2][kflag] = d+1;
+// 	                f = 1;
+// 	            }
+// 	        if (x < ncol-1)
+// 	            if (dist[x+1][y-2][kflag] > d+1) {
+// 	                dist[x+1][y-2][kflag] = d+1;
+// 	                f = 1;
+// 	            }
+//             }
+//     }
+//     if (y < nrow-1) {
+//         if (x > 1)
+//             if (dist[x-2][y+1][kflag] > d+1) {
+//                 dist[x-2][y+1][kflag] = d+1;
+//                 f = 1;
+//             }
+//             if (x < ncol-2) {
+//                 if (dist[x+2][y+1][kflag] > d+1) {
+//                     dist[x+2][y+1][kflag] = d+1;
+//                     f = 1;
+//                 }
+//             }
+//         if (y < nrow-2) {
+//             if (x > 0)
+//                 if (dist[x-1][y+2][kflag] > d+1) {
+//                     dist[x-1][y+2][kflag] = d+1;
+//                     f = 1;
+//                 }
+//             if (x < ncol-1)
+//                 if (dist[x+1][y+2][kflag] > d+1) {
+//                     dist[x+1][y+2][kflag] = d+1;
+//                     f = 1;
+//                 }
+//         }
+//     }
+
+// /* also check the 'pick up king here' move */
+//     if (kflag == 0 && dist[x][y][1] > d + kdist[x][y]) {
+//         dist[x][y][1] = d + kdist[x][y];
+//         if (kdist[x][y] > f) f = kdist[x][y];
+//     }
+//     return f; /* 1 if simple knight move made, 0 if no new move found */
+// }
+
+// void calc_dist(int col, int row) {
+//     int lv, lv2;	/* loop variables */
+//     int d;		/* current distance being checked */
+//     int max; 		/* maximum finite distance found so far */
+//     int f; 		/* temporary variable (returned value from do_step */
+
+// /* initiate all positions to be infinite distance away */
+//     for (lv = 0; lv < ncol; lv++)
+//         for (lv2 = 0; lv2 < nrow; lv2++)
+//             dist[lv][lv2][0] = dist[lv][lv2][1] = MAXN;
+
+// /* starting location is zero w/o king, kdist[col][row] with king */
+//     dist[col][row][0] = 0;
+//     max = dist[col][row][1] = kdist[col][row];
+
+//     for (d = 0; d <= max; d++) { /* for each distance away */
+//         for (lv = 0; lv < ncol; lv++)
+//             for (lv2 = 0; lv2 < nrow; lv2++) {
+// 				/* for each position that distance away */
+//                 if (dist[lv][lv2][0] == d) {
+// 				 /* update with moves through this square */
+//                     f = do_step(lv, lv2, 0);
+//                     if (d + f > max)     /* update max if necessary */
+// 			max = d + f;
+//                  }
+
+//                  if (dist[lv][lv2][1] == d) {
+// 			/* same as above, except this time knight has king */
+//                      f = do_step(lv, lv2, 1);
+//                      if (d + f > max) max = d + f;
+//                  }
+//             }
+//     }
+// }
+
+// int main(int argc, char **argv) {
+//     FILE *fout, *fin;
+//     char t[10];
+//     int pr, pc;
+//     int lv, lv2;
+//     int i, j;
+
+//     if ((fin = fopen("camelot.in", "r")) == NULL) {
+//         perror ("fopen fin");
+//         exit(1);
+//     }
+//     if ((fout = fopen("camelot.out", "w")) == NULL) {
+//         perror ("fopen fout");
+//         exit(1);
+//     }
+
+//     fscanf (fin, "%d %d", &nrow, &ncol);
+//     fscanf (fin, "%s %d", t, &pr);
+//     pc = t[0] - 'A';
+//     pr--;
+
+//   /* Calculate cost of moving king from starting position to
+//    * each board position.  This is just the taxi-cab distance */
+//    for (lv = 0; lv < ncol; lv++)
+//        for (lv2 = 0; lv2 < nrow; lv2++) {
+//            i = abs(pc-lv);
+//            j = abs(pr-lv2);
+//            if (i < j) i = j;
+//            kingcost[lv][lv2] = kdist[lv][lv2] = i;
+//        }
+
+//     while (fscanf (fin, "%s %d", t, &pr) == 2) { /* for all knights */
+//         pc = t[0] - 'A';
+//         pr--;
+
+//         /* calculate distances */
+//         calc_dist(pc, pr);
+
+//         for (lv = 0; lv < ncol; lv++)
+//             for (lv2 = 0; lv2 < nrow; lv2++) {
+//                 /* to collect here, we must also move knight here */
+//                 cost[lv][lv2] += dist[lv][lv2][0];
+
+// 	        /* check to see if it's cheaper for the new knight to
+// 	           pick the king up instead of whoever is doing it now */
+// 	        if (dist[lv][lv2][1] - dist[lv][lv2][0] < kingcost[lv][lv2]) {
+// 	            kingcost[lv][lv2] = dist[lv][lv2][1] - dist[lv][lv2][0];
+// 	        }
+//             }
+//     }
+//     /* find best square to collect in */
+//     pc = cost[0][0] + kingcost[0][0];
+
+//     for (lv = 0; lv < ncol; lv++)
+//         for (lv2 = 0; lv2 < nrow; lv2++)
+//             if (cost[lv][lv2] + kingcost[lv][lv2] < pc) /* better square? */
+//                 pc = cost[lv][lv2] + kingcost[lv][lv2]; 
+//   fprintf (fout, "%i\n", pc);
+//   return 0;
+// }
